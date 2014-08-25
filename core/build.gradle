@@ -14,4 +14,7 @@ dependencies {
     // Google Guava and Apache Commons Lang
     compile 'com.google.guava:guava:17.0'
     compile 'org.apache.commons:commons-lang3:3.3.2'
+
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+
 }
