@@ -1,20 +1,20 @@
 package world;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 
+import gameobjects.AbstractNinja;
 import helpers.AssetsLoader;
-import utils.Point;
 
 /**
  * Created by Peter on 8/25/2014.
  */
 public class GameRender {
-    public float gameHeight, gameWidth;
+    public final float gameHeight, gameWidth, screenHeight, screenWidth;
 
     private GameWorld myWorld;
 
@@ -25,14 +25,14 @@ public class GameRender {
     public GameRender(GameWorld gameWorld){
         this.myWorld = gameWorld;
 
-        float screenHeight = Gdx.graphics.getHeight();
-        float screenWidth = Gdx.graphics.getWidth();
+        screenHeight = Gdx.graphics.getHeight();
+        screenWidth = Gdx.graphics.getWidth();
 
         gameWidth = 640;
         gameHeight = screenHeight / (screenWidth / gameWidth);
 
         camera = new OrthographicCamera();
-        camera.setToOrtho(false, gameWidth / 2, gameHeight / 2);
+        camera.setToOrtho(false, gameWidth, gameHeight);
 
         shapeRenderer = new ShapeRenderer();
         shapeRenderer.setProjectionMatrix(camera.combined);
@@ -41,38 +41,45 @@ public class GameRender {
         batcher.setProjectionMatrix(camera.combined);
     }
 
-    int startX = 10, startY = 10;
-    int width = 40, height = 40;
+    int startX = 20, startY = 20;
+    int width = 80, height = 80;
 
     /**
      * Render the game screen
      * @param delta Time passed since last render
      */
     public void render(float delta){
-        Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-        shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
-
-        int x = startX;
-        for (int i = 0; i < 4; i++) {
-            int y = startY;
-            for (int j = 0; j < 4; j++) {
-                shapeRenderer.rect(x, y, width, height);
-                y += height;
-            }
-            x += width;
-        }
-        shapeRenderer.end();
-
         batcher.begin();
+        batcher.draw(AssetsLoader.background,0,0);
 
-        myWorld.greenNinja.draw(batcher);
-        myWorld.redNinja.draw(batcher);
-        myWorld.yellowNinja.draw(batcher);
-        myWorld.blueNinja.draw(batcher);
+        batcher.setColor(Color.BLUE);
+        batcher.draw(AssetsLoader.matrix,20,20);
+        batcher.setColor(Color.WHITE);
+
+        if(myWorld.isStateRunning() || myWorld.isStateNinjaChosen()) {
+            for(AbstractNinja ninja : myWorld.ninjas){
+                ninja.draw(batcher);
+            }
+        }
+
+        if(myWorld.isStateChoosing()){
+            displayNinjaChoosingText();
+        }
 
         batcher.end();
+    }
+
+    private void displayNinjaChoosingText() {
+        AssetsLoader.font.setColor(Color.WHITE);
+        AssetsLoader.font.setScale(0.5f, 0.5f);
+        AssetsLoader.font.draw(batcher, "FIND NINJA", 410, 220);
+
+        AssetsLoader.font.setColor(Color.YELLOW);
+        AssetsLoader.font.setScale(1f, 1f);
+        float width = AssetsLoader.font.getBounds(myWorld.currentNinja.ninjaColor.colorName()).width;
+        AssetsLoader.font.draw(batcher, myWorld.currentNinja.ninjaColor.colorName(), 590-width, 160);
     }
 
 }

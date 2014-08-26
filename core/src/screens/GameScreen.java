@@ -9,6 +9,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 
 import helpers.AssetsLoader;
+import helpers.InputHandler;
 import utils.Point;
 import world.GameRender;
 import world.GameWorld;
@@ -25,6 +26,8 @@ public class GameScreen implements Screen {
 
         gameWorld = new GameWorld();
         gameRender = new GameRender(gameWorld);
+
+        Gdx.input.setInputProcessor(new InputHandler(gameWorld,gameRender));
     }
 
     @Override

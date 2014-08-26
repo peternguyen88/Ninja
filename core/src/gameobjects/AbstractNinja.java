@@ -3,6 +3,7 @@ package gameobjects;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 
+import constant.NinjaColor;
 import utils.Point;
 import world.GameWorld;
 
@@ -14,32 +15,35 @@ public abstract class AbstractNinja {
     protected float aliveTime;
     protected GameWorld gameWorld;
 
-    public static final int WIDTH = 33, HEIGHT = 38;
+    public static final int WIDTH = 66, HEIGHT = 76;
 
     protected boolean isDisplay = false;
     protected Point location;
 
-    public AbstractNinja(Texture ninjaTexture, GameWorld gameWorld) {
+    public NinjaColor ninjaColor;
+
+    public AbstractNinja(Texture ninjaTexture, GameWorld gameWorld, NinjaColor ninjaColor) {
         this.ninjaTexture = ninjaTexture;
         this.gameWorld = gameWorld;
         this.location = gameWorld.locationGenerator.nextPoint();
+        this.isDisplay = true;
+        this.ninjaColor = ninjaColor;
     }
 
-    public void update(float delta) {
-        aliveTime += delta;
-        if(aliveTime > gameWorld.ninjaAliveTime){
-            isDisplay = !isDisplay;
-            aliveTime = 0;
-            location = gameWorld.locationGenerator.nextPoint();
-        }
+    public void nextPoint() {
+        location = gameWorld.locationGenerator.nextPoint();
     }
 
-    public void draw(SpriteBatch batcher, int x, int y) {
-        if (isDisplay)
-            batcher.draw(ninjaTexture, x, y, WIDTH, HEIGHT);
+    public void setDisplay(boolean display){
+        this.isDisplay = display;
     }
 
     public void draw(SpriteBatch batcher) {
-        batcher.draw(ninjaTexture, location.x, location.y, WIDTH, HEIGHT);
+        if (isDisplay)
+            batcher.draw(ninjaTexture, location.x, location.y, WIDTH, HEIGHT);
+    }
+
+    public Point getLocation(){
+        return location;
     }
 }
