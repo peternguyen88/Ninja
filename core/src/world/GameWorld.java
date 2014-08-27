@@ -19,10 +19,12 @@ public class GameWorld {
     public List<AbstractNinja> ninjas;
 
     public LocationGenerator locationGenerator;
+    public int score;
 
     public float ninjaAliveTime = 0.25f;
     public float flashingTime = 2f;
-    private float aliveTime, runtime;
+    public static final int PAUSE_TIME = 1;
+    private float aliveTime, runtime, idleTime;
 
     private GameState currentState;
     public AbstractNinja currentNinja;
@@ -64,6 +66,18 @@ public class GameWorld {
             case CHOOSING:
 
                 break;
+            case CHOSE:
+                idleTime+=delta;
+                if(idleTime>PAUSE_TIME){
+                    idleTime = 0;
+                    aliveTime = 0;
+                    runtime = 0;
+                    currentState = GameState.RUNNING;
+                    for(AbstractNinja ninja : ninjas){
+                        ninja.setDisplay(true);
+                    }
+                }
+                break;
             default:
                 break;
         }
@@ -96,16 +110,25 @@ public class GameWorld {
         currentNinja.setDisplay(true);
 
         if(currentNinja.getLocation().equals(p)){
-            System.out.println("Correct");
+            chooseCorrectNinja();
         }
         else {
-            for (AbstractNinja ninja : ninjas) {
-                if (ninja.getLocation().equals(p)) {
-                    ninja.setDisplay(true);
-                }
-            }
-            System.out.println("Incorrect");
+            chooseWrongNinja(p);
         }
+    }
+
+    private void chooseCorrectNinja() {
+        System.out.println("Correct");
+        score++;
+    }
+
+    private void chooseWrongNinja(Point p) {
+        for (AbstractNinja ninja : ninjas) {
+            if (ninja.getLocation().equals(p)) {
+                ninja.setDisplay(true);
+            }
+        }
+        System.out.println("Incorrect");
     }
 
     public boolean isStateChoosing(){

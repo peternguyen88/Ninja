@@ -1,5 +1,6 @@
 package helpers;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputProcessor;
 
 import utils.Converter;
@@ -21,6 +22,13 @@ public class InputHandler implements InputProcessor{
         this.scaleFactorY = gameRender.screenHeight/gameRender.gameHeight;
         this.gameHeight = gameRender.gameHeight;
         this.gameWidth = gameRender.gameWidth;
+    }
+
+    public void recalculateScaleFactor(){
+        float screenWidth = Gdx.graphics.getWidth();
+        float screenHeight = Gdx.graphics.getHeight();
+        this.scaleFactorX = screenWidth/gameWidth;
+        this.scaleFactorY = screenHeight/gameHeight;
     }
 
     @Override
@@ -49,8 +57,13 @@ public class InputHandler implements InputProcessor{
             screenX = scaleX(screenX);
             screenY = (int) gameHeight - scaleY(screenY);
 
-            System.out.println(screenX + " --- " + screenY);
-            gameWorld.chooseNinja(Converter.revertLocation(screenX, screenY));
+            if(screenX<30||screenX>350||screenY<20||screenY>340) {
+                System.out.println("Click outside the box");
+            }
+            else{
+                System.out.println(screenX + " --- " + screenY);
+                gameWorld.chooseNinja(Converter.revertLocation(screenX, screenY));
+            }
         }
 
         return false;

@@ -14,7 +14,7 @@ import helpers.AssetsLoader;
  * Created by Peter on 8/25/2014.
  */
 public class GameRender {
-    public final float gameHeight, gameWidth, screenHeight, screenWidth;
+    public float gameHeight, gameWidth, screenHeight, screenWidth;
 
     private GameWorld myWorld;
 
@@ -52,11 +52,12 @@ public class GameRender {
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
         batcher.begin();
-        batcher.draw(AssetsLoader.background,0,0);
 
-        batcher.setColor(Color.BLUE);
-        batcher.draw(AssetsLoader.matrix,20,20);
-        batcher.setColor(Color.WHITE);
+        drawBackground();
+
+        AssetsLoader.font.setColor(Color.CYAN);
+        AssetsLoader.font.setScale(0.25f, 0.25f);
+        AssetsLoader.font.draw(batcher,"SCORE:"+myWorld.score,360,340);
 
         if(myWorld.isStateRunning() || myWorld.isStateNinjaChosen()) {
             for(AbstractNinja ninja : myWorld.ninjas){
@@ -71,6 +72,14 @@ public class GameRender {
         batcher.end();
     }
 
+    private void drawBackground() {
+        batcher.draw(AssetsLoader.background,0,0);
+
+        batcher.setColor(Color.BLUE);
+        batcher.draw(AssetsLoader.matrix,20,20);
+        batcher.setColor(Color.WHITE);
+    }
+
     private void displayNinjaChoosingText() {
         AssetsLoader.font.setColor(Color.WHITE);
         AssetsLoader.font.setScale(0.5f, 0.5f);
@@ -79,7 +88,7 @@ public class GameRender {
         AssetsLoader.font.setColor(Color.YELLOW);
         AssetsLoader.font.setScale(1f, 1f);
         float width = AssetsLoader.font.getBounds(myWorld.currentNinja.ninjaColor.colorName()).width;
-        AssetsLoader.font.draw(batcher, myWorld.currentNinja.ninjaColor.colorName(), 590-width, 160);
+        AssetsLoader.font.draw(batcher, myWorld.currentNinja.ninjaColor.colorName(), 500-width/2, 160);
     }
 
 }

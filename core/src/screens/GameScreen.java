@@ -20,6 +20,7 @@ import world.GameWorld;
 public class GameScreen implements Screen {
     private GameWorld gameWorld;
     private GameRender gameRender;
+    private InputHandler inputHandler;
 
     public GameScreen() {
         AssetsLoader.load();
@@ -27,7 +28,8 @@ public class GameScreen implements Screen {
         gameWorld = new GameWorld();
         gameRender = new GameRender(gameWorld);
 
-        Gdx.input.setInputProcessor(new InputHandler(gameWorld,gameRender));
+        inputHandler = new InputHandler(gameWorld,gameRender);
+        Gdx.input.setInputProcessor(inputHandler);
     }
 
     @Override
@@ -38,6 +40,7 @@ public class GameScreen implements Screen {
 
     @Override
     public void resize(int width, int height) {
+        inputHandler.recalculateScaleFactor();
         System.out.println("Resize");
     }
 
