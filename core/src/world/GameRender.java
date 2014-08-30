@@ -7,8 +7,8 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.scenes.scene2d.ui.Skin;
-import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+
+import java.sql.Time;
 
 import aurelienribon.tweenengine.BaseTween;
 import aurelienribon.tweenengine.Timeline;
@@ -16,8 +16,7 @@ import aurelienribon.tweenengine.Tween;
 import aurelienribon.tweenengine.TweenCallback;
 import aurelienribon.tweenengine.TweenManager;
 import aurelienribon.tweenengine.equations.Back;
-import aurelienribon.tweenengine.equations.Elastic;
-import constant.NinjaColor;
+import aurelienribon.tweenengine.equations.Quart;
 import gameobjects.AbstractNinja;
 import gameobjects.CentralTextDrawer;
 import helpers.AssetsLoader;
@@ -40,8 +39,6 @@ public class GameRender {
     private CentralTextDrawer yourScore, highScore;
     private TweenManager tweenManager;
 
-    private TextButton replay;
-
     public GameRender(GameWorld gameWorld){
         this.myWorld = gameWorld;
         this.myWorld.registerGameRender(this);
@@ -62,7 +59,7 @@ public class GameRender {
         batcher.setProjectionMatrix(camera.combined);
 
         timeUp = AssetsLoader.ninjaAtlas.createSprite("timeup");
-        timeUp.setSize(300,74);
+
         yourScore = new CentralTextDrawer(AssetsLoader.font);
         highScore = new CentralTextDrawer(AssetsLoader.font);
 
@@ -98,6 +95,10 @@ public class GameRender {
             timeUp.draw(batcher);
             yourScore.draw(batcher,"YOUR SCORE: "+ myWorld.score, Color.WHITE, 0.5f,0.5f);
             highScore.draw(batcher,"HIGH SCORE: " + myWorld.highScore, Color.RED, 0.5f,0.5f);
+
+            myWorld.play.render(batcher);
+            myWorld.star.render(batcher);
+            myWorld.leader.render(batcher);
     }
 
     batcher.end();
@@ -139,21 +140,28 @@ public class GameRender {
         Tween.registerAccessor(Sprite.class,new SpriteAccessor());
         Tween.registerAccessor(CentralTextDrawer.class,new TextAccessor());
         tweenManager = new TweenManager();
-        timeUp.setPosition(gameWidth/2-150,0);
+        timeUp.setPosition(gameWidth/2-200,0);
         yourScore.setPosition(gameWidth / 2, -90);
         highScore.setPosition(gameWidth/2,- 120);
 
+        Timeline text = Timeline.createParallel().push(Tween.to(timeUp, SpriteAccessor.POSITION_Y, 1f).target(130).ease(Back.OUT))
+            .push(Tween.to(yourScore, TextAccessor.POSITION_Y, 1f).target(245).ease(Back.OUT))
+            .push(Tween.to(highScore, TextAccessor.POSITION_Y, 1f).target(205).ease(Back.OUT));
+        Timeline button = Timeline.createSequence()
+            .push(createTimeLine(myWorld.play.getSprite()))
+            .push(createTimeLine(myWorld.star.getSprite()))
+            .push(createTimeLine(myWorld.leader.getSprite()));
 
-        TweenCallback callback = new TweenCallback() {
-            @Override
-            public void onEvent(int i, BaseTween<?> baseTween) {
+        Timeline.createParallel().push(text).push(button).start(tweenManager);
+    }
 
-            }
-        };
-
-        Timeline.createParallel().push(Tween.to(timeUp,SpriteAccessor.POSITION_Y,1f).target(240).ease(Back.OUT))
-            .push(Tween.to(yourScore, SpriteAccessor.POSITION_Y, 1f).target(210).ease(Back.OUT))
-            .push(Tween.to(highScore, SpriteAccessor.POSITION_Y, 1f).target(170).ease(Back.OUT))
-            .start(tweenManager);
+    private Timeline createTimeLine(Sprite sprite){
+        return Timeline.createSequence()
+                .push(Tween.set(sprite,SpriteAccessor.SCALE_XY).target(10,10))
+                .push(Tween.set(sprite, SpriteAccessor.OPACITY).target(0))
+                .beginParallel()
+                .push(Tween.to(sprite, SpriteAccessor.OPACITY, 0.6f).target(1).ease(Quart.INOUT))
+                .push(Tween.to(sprite, SpriteAccessor.SCALE_XY, 0.6f).target(1, 1).ease(Quart.INOUT))
+                .end();
     }
 }

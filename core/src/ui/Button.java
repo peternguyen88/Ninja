@@ -13,15 +13,16 @@ import game.NinjaGame;
 public class Button {
     private TextureRegion background;
     private TextureRegion backgroundClicked;
-    private TextureRegion icon;
-    private String text;
-    private BitmapFont font;
     private Vector2 pos;
     private int width;
     private int height;
     private boolean clicked;
 
     private OnClickListener onClickListener;
+
+    public Button(TextureRegion background, float x, float y) {
+        this(background,background,x,y);
+    }
 
     public Button(TextureRegion background, TextureRegion backgroundClicked, float x, float y) {
         this.background = background;
@@ -87,6 +88,22 @@ public class Button {
 
     public static abstract class OnClickListener{
         protected abstract void onClick(boolean clickedValue);
+    }
+
+    public float getX(){
+        return pos.x;
+    }
+
+    public float getY(){
+        return pos.y;
+    }
+
+    public void setX(float x){
+        this.pos.x = x;
+    }
+
+    public void setY(float y){
+        this.pos.y = y;
     }
 }
 

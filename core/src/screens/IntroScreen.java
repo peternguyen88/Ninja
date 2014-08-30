@@ -82,14 +82,13 @@ public class IntroScreen implements Screen, InputProcessor{
 
             @Override
             protected void onClick(boolean clickedValue) {
-                pref.putBoolean(C.Prefs.SOUND_ENABLE, clickedValue);
+                pref.putBoolean(C.Prefs.SOUND_ENABLE, !clickedValue);
                 pref.flush();
             }
         });
-        sound.setClickedValue(pref.getBoolean(C.Prefs.SOUND_ENABLE));
+        sound.setClickedValue(!pref.getBoolean(C.Prefs.SOUND_ENABLE));
 
-        TextureRegion leaderTexture = AssetsLoader.ninjaAtlas.findRegion("leader-board");
-        leaderBoard = new Button(leaderTexture,leaderTexture,130,20);
+        leaderBoard = new Button(AssetsLoader.ninjaAtlas.findRegion("leader-board"),130,20);
     }
 
     private void calculateScaleFactor(){

@@ -23,16 +23,6 @@ public class GameLevelManager {
 
     public GameLevelManager(GameWorld gameWorld) {
         this.gameWorld = gameWorld;
-
-        availableNinjas = new ArrayList<AbstractNinja>();
-
-        availableNinjas.add(new RealNinja(AssetsLoader.greenNinja, gameWorld, NinjaColor.GREEN));
-        availableNinjas.add(new RealNinja(AssetsLoader.redNinja, gameWorld, NinjaColor.RED));
-        availableNinjas.add(new RealNinja(AssetsLoader.yellowNinja, gameWorld, NinjaColor.YELLOW));
-        availableNinjas.add(new RealNinja(AssetsLoader.blueNinja, gameWorld, NinjaColor.BLUE));
-
-        Collections.shuffle(availableNinjas);
-
         level1();
     }
 
@@ -83,7 +73,17 @@ public class GameLevelManager {
 
     }
 
-    private void level1() {
+    public void level1() {
+
+        availableNinjas = new ArrayList<AbstractNinja>();
+
+        availableNinjas.add(new RealNinja(AssetsLoader.greenNinja, gameWorld, NinjaColor.GREEN));
+        availableNinjas.add(new RealNinja(AssetsLoader.redNinja, gameWorld, NinjaColor.RED));
+        availableNinjas.add(new RealNinja(AssetsLoader.yellowNinja, gameWorld, NinjaColor.YELLOW));
+        availableNinjas.add(new RealNinja(AssetsLoader.blueNinja, gameWorld, NinjaColor.BLUE));
+
+        Collections.shuffle(availableNinjas);
+
         level = 1;
         gameWorld.sameTextColor = true;
         gameWorld.ninjas.add(availableNinjas.remove(0));

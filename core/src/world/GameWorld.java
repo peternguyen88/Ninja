@@ -7,13 +7,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import constant.NinjaColor;
+import constant.C;
 import gameobjects.AbstractNinja;
-import gameobjects.RealNinja;
 import helpers.AssetsLoader;
 import helpers.GameLevelManager;
 import helpers.LocationGenerator;
 import screens.GameScreen;
+import ui.SpriteButton;
 import utils.Point;
 
 /**
@@ -44,6 +44,8 @@ public class GameWorld {
 
     private Preferences prefs;
 
+    public SpriteButton play,star,leader;
+
     enum GameState {
         RUNNING, CHOOSING, CHOSE,GAME_OVER
     }
@@ -57,6 +59,10 @@ public class GameWorld {
         this.timeLeft = DEFAULT_CHOOSING_TIME;
         prefs = Gdx.app.getPreferences("Preference");
         highScore = prefs.getInteger("high_score",0);
+
+        play = new SpriteButton(AssetsLoader.ninjaAtlas.createSprite("play"),200,100).setOpacity(0);
+        star = new SpriteButton(AssetsLoader.ninjaAtlas.createSprite("star"),280,100).setOpacity(0);
+        leader = new SpriteButton(AssetsLoader.ninjaAtlas.createSprite("leader-board"),360,100).setOpacity(0);
     }
 
     public void update(float delta) {
@@ -152,20 +158,50 @@ public class GameWorld {
     }
 
     private void chooseCorrectNinja() {
-        AssetsLoader.correct.play();
+        if(prefs.getBoolean(C.Prefs.SOUND_ENABLE))
+            AssetsLoader.correct.play();
         System.out.println("Correct");
         score++;
         timeLeft++;
     }
 
     private void chooseWrongNinja(Point p) {
-        AssetsLoader.wrong.play();
+        if(prefs.getBoolean(C.Prefs.SOUND_ENABLE))
+            AssetsLoader.wrong.play();
         for (AbstractNinja ninja : ninjas) {
             if (ninja.getLocation().equals(p)) {
                 ninja.setDisplay(true);
             }
         }
         System.out.println("Incorrect");
+    }
+
+    public void click(int x, int y){
+        if(currentState == GameState.GAME_OVER) {
+            if (play.isClicked(x, y)) {
+                this.restart();
+            }
+            if (star.isClicked(x, y)) {
+                Gdx.net.openURI(C.Info.URI);
+            }
+            if (leader.isClicked(x, y)) {
+                System.out.println("Leader");
+            }
+        }
+    }
+
+    public void restart(){
+        this.ninjas.clear();
+        this.currentState = GameState.RUNNING;
+        this.runtime = 0;
+        this.idleTime = 0;
+        this.aliveTime = 0;
+        this.timeLeft = DEFAULT_CHOOSING_TIME;
+        this.play.setOpacity(0);
+        this.star.setOpacity(0);
+        this.leader.setOpacity(0);
+        this.score = 0;
+        gameLevelManager.level1();
     }
 
     public void registerGameRender(GameRender gameRender){
