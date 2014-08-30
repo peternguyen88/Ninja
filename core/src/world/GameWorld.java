@@ -1,5 +1,8 @@
 package world;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Preferences;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -8,18 +11,19 @@ import constant.NinjaColor;
 import gameobjects.AbstractNinja;
 import gameobjects.RealNinja;
 import helpers.AssetsLoader;
+import helpers.GameLevelManager;
 import helpers.LocationGenerator;
+import screens.GameScreen;
 import utils.Point;
 
 /**
  * Created by Peter on 8/25/2014.
  */
 public class GameWorld {
-    public AbstractNinja greenNinja, redNinja, yellowNinja, blueNinja;
     public List<AbstractNinja> ninjas;
 
     public LocationGenerator locationGenerator;
-    public int score;
+    public int score, highScore;
 
     public float ninjaAliveTime = 0.25f;
     public float flashingTime = 2f;
@@ -30,26 +34,29 @@ public class GameWorld {
     public AbstractNinja currentNinja;
     private Random random = new Random();
 
+    private float timeLeft;
+    public static final int DEFAULT_CHOOSING_TIME = 3;
+    private GameLevelManager gameLevelManager;
+    private GameScreen gameScreen;
+    private GameRender gameRender;
+
+    public boolean sameTextColor;
+
+    private Preferences prefs;
+
     enum GameState {
-        RUNNING, CHOOSING, CHOSE
+        RUNNING, CHOOSING, CHOSE,GAME_OVER
     }
 
-    public GameWorld() {
+    public GameWorld(GameScreen gameScreen) {
         locationGenerator = new LocationGenerator();
-
+        this.gameScreen = gameScreen;
         ninjas = new ArrayList<AbstractNinja>();
-
-        greenNinja = new RealNinja(AssetsLoader.greenNinja, this, NinjaColor.GREEN);
-        redNinja = new RealNinja(AssetsLoader.redNinja, this, NinjaColor.RED);
-        yellowNinja = new RealNinja(AssetsLoader.yellowNinja, this, NinjaColor.YELLOW);
-        blueNinja = new RealNinja(AssetsLoader.blueNinja, this, NinjaColor.BLUE);
-
-        ninjas.add(greenNinja);
-        ninjas.add(redNinja);
-        ninjas.add(yellowNinja);
-        ninjas.add(blueNinja);
-
+        this.gameLevelManager = new GameLevelManager(this);
         currentState = GameState.RUNNING;
+        this.timeLeft = DEFAULT_CHOOSING_TIME;
+        prefs = Gdx.app.getPreferences("Preference");
+        highScore = prefs.getInteger("high_score",0);
     }
 
     public void update(float delta) {
@@ -64,19 +71,19 @@ public class GameWorld {
                 runningUpdate(delta);
                 break;
             case CHOOSING:
-
+                choosingUpdate(delta);
                 break;
             case CHOSE:
                 idleTime+=delta;
                 if(idleTime>PAUSE_TIME){
-                    idleTime = 0;
-                    aliveTime = 0;
-                    runtime = 0;
+                    idleTime = 0; aliveTime = 0; runtime = 0;
                     currentState = GameState.RUNNING;
                     for(AbstractNinja ninja : ninjas){
                         ninja.setDisplay(true);
                     }
                 }
+                break;
+            case GAME_OVER:
                 break;
             default:
                 break;
@@ -105,30 +112,68 @@ public class GameWorld {
         }
     }
 
+    private void choosingUpdate(float delta){
+        timeLeft -= delta;
+        if(timeLeft<=0){
+            timeLeft = 0;
+            gameOver();
+        }
+    }
+
+    private void gameOver() {
+        currentState = GameState.GAME_OVER;
+
+        if(score > highScore){
+            highScore = score;
+            prefs.putInteger("high_score", highScore);
+            prefs.flush();
+        }
+
+        for(AbstractNinja ninja : ninjas){
+            ninja.setDisplay(true);
+        }
+        gameRender.setupTween();
+    }
+
     public void chooseNinja(Point p){
         currentState = GameState.CHOSE;
+
         currentNinja.setDisplay(true);
+        currentNinja.clearRandomColor();
 
         if(currentNinja.getLocation().equals(p)){
             chooseCorrectNinja();
+            gameLevelManager.chooseCorrectly();
         }
         else {
             chooseWrongNinja(p);
+            gameLevelManager.chooseWrongly();
         }
     }
 
     private void chooseCorrectNinja() {
+        AssetsLoader.correct.play();
         System.out.println("Correct");
         score++;
+        timeLeft++;
     }
 
     private void chooseWrongNinja(Point p) {
+        AssetsLoader.wrong.play();
         for (AbstractNinja ninja : ninjas) {
             if (ninja.getLocation().equals(p)) {
                 ninja.setDisplay(true);
             }
         }
         System.out.println("Incorrect");
+    }
+
+    public void registerGameRender(GameRender gameRender){
+        this.gameRender = gameRender;
+    }
+
+    public float getTimeLeft(){
+        return (int)(timeLeft * 100)/100.0f;
     }
 
     public boolean isStateChoosing(){
@@ -142,4 +187,6 @@ public class GameWorld {
     public boolean isStateNinjaChosen() {
         return currentState == GameState.CHOSE;
     }
+
+    public boolean isStateGameOver(){return currentState == GameState.GAME_OVER;}
 }

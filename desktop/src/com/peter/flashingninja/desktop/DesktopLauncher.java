@@ -2,9 +2,8 @@ package com.peter.flashingninja.desktop;
 
 import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
-import com.peter.flashingninja.FlashingNinja;
 
-import game.Ninja;
+import game.NinjaGame;
 
 public class DesktopLauncher {
 	public static void main (String[] arg) {
@@ -12,6 +11,6 @@ public class DesktopLauncher {
         config.title = "Flashing Ninja ^_^";
         config.height = 360;
         config.width = 640;
-		new LwjglApplication(new Ninja(), config);
+		new LwjglApplication(new NinjaGame(), config);
 	}
 }

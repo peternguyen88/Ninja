@@ -1,5 +1,6 @@
 package screens;
 
+import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
@@ -22,10 +23,12 @@ public class GameScreen implements Screen {
     private GameRender gameRender;
     private InputHandler inputHandler;
 
-    public GameScreen() {
-        AssetsLoader.load();
+    private Game ninjaGame;
 
-        gameWorld = new GameWorld();
+    public GameScreen(Game game) {
+        this.ninjaGame = game;
+
+        gameWorld = new GameWorld(this);
         gameRender = new GameRender(gameWorld);
 
         inputHandler = new InputHandler(gameWorld,gameRender);
@@ -42,6 +45,14 @@ public class GameScreen implements Screen {
     public void resize(int width, int height) {
         inputHandler.recalculateScaleFactor();
         System.out.println("Resize");
+    }
+
+    public void switchToInputHandler(){
+        Gdx.input.setInputProcessor(inputHandler);
+    }
+
+    public Game getGame(){
+        return this.ninjaGame;
     }
 
     @Override
