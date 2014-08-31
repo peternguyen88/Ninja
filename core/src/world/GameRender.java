@@ -17,6 +17,7 @@ import aurelienribon.tweenengine.TweenCallback;
 import aurelienribon.tweenengine.TweenManager;
 import aurelienribon.tweenengine.equations.Back;
 import aurelienribon.tweenengine.equations.Quart;
+import game.NinjaGame;
 import gameobjects.AbstractNinja;
 import gameobjects.CentralTextDrawer;
 import helpers.AssetsLoader;
@@ -152,7 +153,14 @@ public class GameRender {
             .push(createTimeLine(myWorld.star.getSprite()))
             .push(createTimeLine(myWorld.leader.getSprite()));
 
-        Timeline.createParallel().push(text).push(button).start(tweenManager);
+        TweenCallback callback = new TweenCallback() {
+            @Override
+            public void onEvent(int type, BaseTween<?> source) {
+                NinjaGame.googleServices.showInterstitialAd(true);
+            }
+        };
+
+        Timeline.createParallel().push(text).push(button).setCallback(callback).start(tweenManager);
     }
 
     private Timeline createTimeLine(Sprite sprite){

@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Random;
 
 import constant.C;
+import game.NinjaGame;
 import gameobjects.AbstractNinja;
 import helpers.AssetsLoader;
 import helpers.GameLevelManager;
@@ -15,6 +16,7 @@ import helpers.LocationGenerator;
 import screens.GameScreen;
 import ui.SpriteButton;
 import utils.Point;
+import utils.RandomGenerator;
 
 /**
  * Created by Peter on 8/25/2014.
@@ -35,7 +37,7 @@ public class GameWorld {
     private Random random = new Random();
 
     private float timeLeft;
-    public static final int DEFAULT_CHOOSING_TIME = 3;
+    public static final int DEFAULT_CHOOSING_TIME = 20;
     private GameLevelManager gameLevelManager;
     private GameScreen gameScreen;
     private GameRender gameRender;
@@ -44,10 +46,10 @@ public class GameWorld {
 
     private Preferences prefs;
 
-    public SpriteButton play,star,leader;
+    public SpriteButton play, star, leader;
 
     enum GameState {
-        RUNNING, CHOOSING, CHOSE,GAME_OVER
+        RUNNING, CHOOSING, CHOSE, GAME_OVER
     }
 
     public GameWorld(GameScreen gameScreen) {
@@ -58,17 +60,17 @@ public class GameWorld {
         currentState = GameState.RUNNING;
         this.timeLeft = DEFAULT_CHOOSING_TIME;
         prefs = Gdx.app.getPreferences("Preference");
-        highScore = prefs.getInteger("high_score",0);
+        highScore = prefs.getInteger("high_score", 0);
 
-        play = new SpriteButton(AssetsLoader.ninjaAtlas.createSprite("play"),200,100).setOpacity(0);
-        star = new SpriteButton(AssetsLoader.ninjaAtlas.createSprite("star"),280,100).setOpacity(0);
-        leader = new SpriteButton(AssetsLoader.ninjaAtlas.createSprite("leader-board"),360,100).setOpacity(0);
+        play = new SpriteButton(AssetsLoader.ninjaAtlas.createSprite("play"), 200, 100).setOpacity(0);
+        star = new SpriteButton(AssetsLoader.ninjaAtlas.createSprite("star"), 280, 100).setOpacity(0);
+        leader = new SpriteButton(AssetsLoader.ninjaAtlas.createSprite("leader-board"), 360, 100).setOpacity(0);
     }
 
     public void update(float delta) {
         runtime += delta;
 
-        if(runtime > flashingTime && isStateRunning()){
+        if (runtime > flashingTime && isStateRunning()) {
             switchToChoosingState();
         }
 
@@ -80,11 +82,13 @@ public class GameWorld {
                 choosingUpdate(delta);
                 break;
             case CHOSE:
-                idleTime+=delta;
-                if(idleTime>PAUSE_TIME){
-                    idleTime = 0; aliveTime = 0; runtime = 0;
+                idleTime += delta;
+                if (idleTime > PAUSE_TIME) {
+                    idleTime = 0;
+                    aliveTime = 0;
+                    runtime = 0;
                     currentState = GameState.RUNNING;
-                    for(AbstractNinja ninja : ninjas){
+                    for (AbstractNinja ninja : ninjas) {
                         ninja.setDisplay(true);
                     }
                 }
@@ -99,28 +103,28 @@ public class GameWorld {
     private void switchToChoosingState() {
         currentState = GameState.CHOOSING;
 
-        for(AbstractNinja ninja : ninjas){
+        for (AbstractNinja ninja : ninjas) {
             ninja.setDisplay(false);
         }
 
         currentNinja = ninjas.get(random.nextInt(ninjas.size()));
     }
 
-    private void runningUpdate(float delta){
+    private void runningUpdate(float delta) {
         aliveTime += delta;
         if (aliveTime > ninjaAliveTime) {
             locationGenerator.reset();
             aliveTime = 0;
 
-            for(AbstractNinja ninja : ninjas){
+            for (AbstractNinja ninja : ninjas) {
                 ninja.nextPoint();
             }
         }
     }
 
-    private void choosingUpdate(float delta){
+    private void choosingUpdate(float delta) {
         timeLeft -= delta;
-        if(timeLeft<=0){
+        if (timeLeft <= 0) {
             timeLeft = 0;
             gameOver();
         }
@@ -129,36 +133,42 @@ public class GameWorld {
     private void gameOver() {
         currentState = GameState.GAME_OVER;
 
-        if(score > highScore){
+        // Show ad now ^_^ Money pleases come
+        if (RandomGenerator.trueValueWithPossibility(35))
+            NinjaGame.googleServices.showBannerAd(true);
+
+        if (score > highScore) {
             highScore = score;
             prefs.putInteger("high_score", highScore);
             prefs.flush();
+            if (NinjaGame.googleServices.isSignedIn()) {
+                NinjaGame.googleServices.submitScore(highScore);
+            }
         }
 
-        for(AbstractNinja ninja : ninjas){
+        for (AbstractNinja ninja : ninjas) {
             ninja.setDisplay(true);
         }
         gameRender.setupTween();
     }
 
-    public void chooseNinja(Point p){
+    public void chooseNinja(Point p) {
         currentState = GameState.CHOSE;
 
         currentNinja.setDisplay(true);
         currentNinja.clearRandomColor();
 
-        if(currentNinja.getLocation().equals(p)){
+        if (currentNinja.getLocation().equals(p)) {
             chooseCorrectNinja();
             gameLevelManager.chooseCorrectly();
-        }
-        else {
+        } else {
             chooseWrongNinja(p);
             gameLevelManager.chooseWrongly();
         }
     }
 
     private void chooseCorrectNinja() {
-        if(prefs.getBoolean(C.Prefs.SOUND_ENABLE))
+        if (prefs.getBoolean(C.Prefs.SOUND_ENABLE))
             AssetsLoader.correct.play();
         System.out.println("Correct");
         score++;
@@ -166,7 +176,7 @@ public class GameWorld {
     }
 
     private void chooseWrongNinja(Point p) {
-        if(prefs.getBoolean(C.Prefs.SOUND_ENABLE))
+        if (prefs.getBoolean(C.Prefs.SOUND_ENABLE))
             AssetsLoader.wrong.play();
         for (AbstractNinja ninja : ninjas) {
             if (ninja.getLocation().equals(p)) {
@@ -176,21 +186,24 @@ public class GameWorld {
         System.out.println("Incorrect");
     }
 
-    public void click(int x, int y){
-        if(currentState == GameState.GAME_OVER) {
+    public void click(int x, int y) {
+        if (currentState == GameState.GAME_OVER) {
             if (play.isClicked(x, y)) {
+                System.out.printf("Restart");
                 this.restart();
             }
             if (star.isClicked(x, y)) {
-                Gdx.net.openURI(C.Info.URI);
+                System.out.printf("Rate Game");
+                NinjaGame.googleServices.rateGame();
             }
             if (leader.isClicked(x, y)) {
-                System.out.println("Leader");
+                System.out.println("Load Leader Board");
+                NinjaGame.loadLeaderBoard();
             }
         }
     }
 
-    public void restart(){
+    public void restart() {
         this.ninjas.clear();
         this.currentState = GameState.RUNNING;
         this.runtime = 0;
@@ -201,22 +214,23 @@ public class GameWorld {
         this.star.setOpacity(0);
         this.leader.setOpacity(0);
         this.score = 0;
+        NinjaGame.googleServices.showBannerAd(false);
         gameLevelManager.level1();
     }
 
-    public void registerGameRender(GameRender gameRender){
+    public void registerGameRender(GameRender gameRender) {
         this.gameRender = gameRender;
     }
 
-    public float getTimeLeft(){
-        return (int)(timeLeft * 100)/100.0f;
+    public float getTimeLeft() {
+        return (int) (timeLeft * 100) / 100.0f;
     }
 
-    public boolean isStateChoosing(){
+    public boolean isStateChoosing() {
         return currentState == GameState.CHOOSING;
     }
 
-    public boolean isStateRunning(){
+    public boolean isStateRunning() {
         return currentState == GameState.RUNNING;
     }
 
@@ -224,5 +238,7 @@ public class GameWorld {
         return currentState == GameState.CHOSE;
     }
 
-    public boolean isStateGameOver(){return currentState == GameState.GAME_OVER;}
+    public boolean isStateGameOver() {
+        return currentState == GameState.GAME_OVER;
+    }
 }
