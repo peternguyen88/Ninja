@@ -1,5 +1,6 @@
 package world;
 
+import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Preferences;
 
@@ -14,6 +15,7 @@ import helpers.AssetsLoader;
 import helpers.GameLevelManager;
 import helpers.LocationGenerator;
 import screens.GameScreen;
+import screens.IntroScreen;
 import ui.SpriteButton;
 import utils.Point;
 import utils.RandomGenerator;
@@ -36,10 +38,11 @@ public class GameWorld {
     public AbstractNinja currentNinja;
     private Random random = new Random();
 
+    private Game game;
+
     private float timeLeft;
     public static final int DEFAULT_CHOOSING_TIME = 20;
     private GameLevelManager gameLevelManager;
-    private GameScreen gameScreen;
     private GameRender gameRender;
 
     public boolean sameTextColor;
@@ -52,15 +55,15 @@ public class GameWorld {
         RUNNING, CHOOSING, CHOSE, GAME_OVER
     }
 
-    public GameWorld(GameScreen gameScreen) {
+    public GameWorld(Game game) {
         locationGenerator = new LocationGenerator();
-        this.gameScreen = gameScreen;
         ninjas = new ArrayList<AbstractNinja>();
         this.gameLevelManager = new GameLevelManager(this);
         currentState = GameState.RUNNING;
         this.timeLeft = DEFAULT_CHOOSING_TIME;
         prefs = Gdx.app.getPreferences("Preference");
         highScore = prefs.getInteger("high_score", 0);
+        this.game = game;
 
         play = new SpriteButton(AssetsLoader.ninjaAtlas.createSprite("play"), 200, 100).setOpacity(0);
         star = new SpriteButton(AssetsLoader.ninjaAtlas.createSprite("star"), 280, 100).setOpacity(0);
@@ -134,8 +137,7 @@ public class GameWorld {
         currentState = GameState.GAME_OVER;
 
         // Show ad now ^_^ Money pleases come
-        if (RandomGenerator.trueValueWithPossibility(35))
-            NinjaGame.googleServices.showBannerAd(true);
+        NinjaGame.googleServices.showBannerAd(true);
 
         if (score > highScore) {
             highScore = score;
@@ -201,6 +203,11 @@ public class GameWorld {
                 NinjaGame.loadLeaderBoard();
             }
         }
+    }
+
+    public void backPress(){
+        NinjaGame.googleServices.showBannerAd(true);
+        this.game.setScreen(new IntroScreen((NinjaGame) this.game));
     }
 
     public void restart() {

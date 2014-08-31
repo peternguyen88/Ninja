@@ -28,7 +28,7 @@ public class GameScreen implements Screen {
     public GameScreen(Game game) {
         this.ninjaGame = game;
 
-        gameWorld = new GameWorld(this);
+        gameWorld = new GameWorld(game);
         gameRender = new GameRender(gameWorld);
 
         inputHandler = new InputHandler(gameWorld,gameRender);

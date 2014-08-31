@@ -23,6 +23,7 @@ import gameobjects.CentralTextDrawer;
 import helpers.AssetsLoader;
 import tweenacessors.SpriteAccessor;
 import tweenacessors.TextAccessor;
+import utils.RandomGenerator;
 
 /**
  * Created by Peter on 8/25/2014.
@@ -156,7 +157,8 @@ public class GameRender {
         TweenCallback callback = new TweenCallback() {
             @Override
             public void onEvent(int type, BaseTween<?> source) {
-                NinjaGame.googleServices.showInterstitialAd(true);
+                if (RandomGenerator.trueValueWithPossibility(40))
+                    NinjaGame.googleServices.showInterstitialAd(true);
             }
         };
 

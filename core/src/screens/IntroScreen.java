@@ -20,7 +20,7 @@ import utils.RandomGenerator;
 /**
  * Created by Peter on 8/25/2014.
  */
-public class IntroScreen implements Screen, InputProcessor {
+public class IntroScreen implements Screen, InputProcessor{
 
     public float gameHeight, gameWidth, screenHeight, screenWidth;
     private float scaleFactorX, scaleFactorY;
@@ -41,7 +41,7 @@ public class IntroScreen implements Screen, InputProcessor {
 
     Button startGame, sound, leaderBoard;
 
-    public IntroScreen(NinjaGame game) {
+    public IntroScreen(NinjaGame game){
         this.myGame = game;
         Gdx.input.setInputProcessor(this);
 
@@ -60,14 +60,6 @@ public class IntroScreen implements Screen, InputProcessor {
         initButton();
 
         initNinjaAnimation();
-
-        showAd();
-    }
-
-    private void showAd() {
-        if (NinjaGame.launchTime >= 5)
-            if (RandomGenerator.trueValueWithPossibility(50))
-                NinjaGame.googleServices.showInterstitialAd(true);
     }
 
     private void initNinjaAnimation() {
@@ -81,12 +73,12 @@ public class IntroScreen implements Screen, InputProcessor {
         stateTime = 0;
     }
 
-    private void initButton() {
+    private void initButton(){
         downBtn = false;
-        startGame = new Button(AssetsLoader.buttonUp, AssetsLoader.buttonDown, 400, 40);
+        startGame = new Button(AssetsLoader.buttonUp,AssetsLoader.buttonDown,400,40);
 
         final Preferences pref = Gdx.app.getPreferences(C.Prefs.PREFERENCE_NAME);
-        sound = new Button(AssetsLoader.ninjaAtlas.findRegion("sound"), AssetsLoader.ninjaAtlas.findRegion("no-sound"), 50, 20);
+        sound = new Button(AssetsLoader.ninjaAtlas.findRegion("sound"), AssetsLoader.ninjaAtlas.findRegion("no-sound"),50,20);
         sound.setOnClickListener(new Button.OnClickListener() {
 
             @Override
@@ -95,25 +87,25 @@ public class IntroScreen implements Screen, InputProcessor {
                 pref.flush();
             }
         });
-        sound.setClickedValue(!pref.getBoolean(C.Prefs.SOUND_ENABLE, true));
+        sound.setClickedValue(!pref.getBoolean(C.Prefs.SOUND_ENABLE,true));
 
-        leaderBoard = new Button(AssetsLoader.ninjaAtlas.findRegion("leader-board"), 130, 20);
+        leaderBoard = new Button(AssetsLoader.ninjaAtlas.findRegion("leader-board"),130,20);
     }
 
-    private void calculateScaleFactor() {
-        this.scaleFactorX = Gdx.graphics.getWidth() / gameWidth;
-        this.scaleFactorY = Gdx.graphics.getHeight() / gameHeight;
+    private void calculateScaleFactor(){
+        this.scaleFactorX = Gdx.graphics.getWidth()/gameWidth;
+        this.scaleFactorY = Gdx.graphics.getHeight()/gameHeight;
     }
 
     @Override
     public void render(float delta) {
         spriteBatch.begin();
 
-        spriteBatch.draw(AssetsLoader.background, 0, 0);
+        spriteBatch.draw(AssetsLoader.background,0,0);
         spriteBatch.draw(AssetsLoader.title, 300, 130);
 
         stateTime += delta;
-        spriteBatch.draw(ninjaAnimation.getKeyFrame(stateTime, true), 50, 100);
+        spriteBatch.draw(ninjaAnimation.getKeyFrame(stateTime,true),50,100);
 
         startGame.render(spriteBatch);
         sound.render(spriteBatch);
@@ -129,12 +121,12 @@ public class IntroScreen implements Screen, InputProcessor {
 
     @Override
     public boolean touchDown(int screenX, int screenY, int pointer, int button) {
-        screenX = (int) (screenX / scaleFactorX);
-        screenY = (int) ((int) gameHeight - screenY / scaleFactorY);
+        screenX = (int) (screenX/scaleFactorX);
+        screenY = (int) ((int) gameHeight - screenY/scaleFactorY);
 
-        startGame.isClicked(screenX, screenY);
-        sound.toggle(screenX, screenY);
-        if (leaderBoard.isClicked(screenX, screenY)) {
+        startGame.isClicked(screenX,screenY);
+        sound.toggle(screenX,screenY);
+        if(leaderBoard.isClicked(screenX,screenY)){
             System.out.println("Load Leader Board");
             NinjaGame.loadLeaderBoard();
         }
@@ -144,7 +136,7 @@ public class IntroScreen implements Screen, InputProcessor {
 
     @Override
     public boolean touchUp(int screenX, int screenY, int pointer, int button) {
-        if (startGame.getClickedValue()) {
+        if(startGame.getClickedValue()){
             startGame.touchUp();
             NinjaGame.googleServices.showBannerAd(false);
             myGame.setScreen(new GameScreen(myGame));

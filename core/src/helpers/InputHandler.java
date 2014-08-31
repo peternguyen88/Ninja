@@ -1,6 +1,7 @@
 package helpers;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputProcessor;
 
 import utils.Converter;
@@ -22,6 +23,7 @@ public class InputHandler implements InputProcessor{
         this.scaleFactorY = gameRender.screenHeight/gameRender.gameHeight;
         this.gameHeight = gameRender.gameHeight;
         this.gameWidth = gameRender.gameWidth;
+        Gdx.input.setCatchBackKey(true);
     }
 
     public void recalculateScaleFactor(){
@@ -33,6 +35,9 @@ public class InputHandler implements InputProcessor{
 
     @Override
     public boolean keyDown(int keycode) {
+        if(keycode== Input.Keys.BACK){
+            gameWorld.backPress();
+        }
         return false;
     }
 

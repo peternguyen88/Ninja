@@ -25,6 +25,7 @@ public class NinjaGame extends Game {
 
     @Override
     public void create() {
+        launchTimeSetup();
         System.out.println("Start Game");
 
         System.out.println("Load Resources");
@@ -35,10 +36,13 @@ public class NinjaGame extends Game {
 
         System.out.println(Gdx.graphics.getWidth());
         System.out.println(Gdx.graphics.getHeight());
+    }
 
+    private void launchTimeSetup() {
         Preferences prefs = Gdx.app.getPreferences(C.Prefs.PREFERENCE_NAME);
         launchTime = prefs.getInteger(C.Prefs.LAUNCH_TIME,0);
         prefs.putInteger(C.Prefs.LAUNCH_TIME,++launchTime);
+        System.out.println("Launch TIME :"+launchTime);
         prefs.flush();
     }
 
