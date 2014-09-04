@@ -16,7 +16,7 @@ public class AssetsLoader {
 
     public static Texture background, matrix;
 
-    public static TextureRegion title, timeUp, buttonUp, buttonDown;
+    public static TextureRegion title, timeUp, buttonUp, buttonDown, exitGame;
 
     public static TextureAtlas ninjaAtlas;
 

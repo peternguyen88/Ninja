@@ -39,7 +39,7 @@ public class IntroScreen implements Screen, InputProcessor{
     TextureRegion[] ninjaFrames;
     Animation ninjaAnimation;
 
-    Button startGame, sound, leaderBoard;
+    Button startGame, exitGame, sound, leaderBoard;
 
     public IntroScreen(NinjaGame game){
         this.myGame = game;
@@ -75,7 +75,15 @@ public class IntroScreen implements Screen, InputProcessor{
 
     private void initButton(){
         downBtn = false;
-        startGame = new Button(AssetsLoader.buttonUp,AssetsLoader.buttonDown,400,40);
+        startGame = new Button(AssetsLoader.buttonUp,AssetsLoader.buttonDown,330,40);
+        exitGame = new Button(AssetsLoader.ninjaAtlas.findRegion("exit"),490,40);
+
+        exitGame.setOnClickListener(new Button.OnClickListener() {
+            @Override
+            protected void onClick(boolean clickedValue) {
+                System.exit(0);
+            }
+        });
 
         final Preferences pref = Gdx.app.getPreferences(C.Prefs.PREFERENCE_NAME);
         sound = new Button(AssetsLoader.ninjaAtlas.findRegion("sound"), AssetsLoader.ninjaAtlas.findRegion("no-sound"),50,20);
@@ -110,6 +118,7 @@ public class IntroScreen implements Screen, InputProcessor{
         startGame.render(spriteBatch);
         sound.render(spriteBatch);
         leaderBoard.render(spriteBatch);
+        exitGame.render(spriteBatch);
 
         spriteBatch.end();
     }
@@ -126,6 +135,8 @@ public class IntroScreen implements Screen, InputProcessor{
 
         startGame.isClicked(screenX,screenY);
         sound.toggle(screenX,screenY);
+        exitGame.isClicked(screenX,screenY);
+
         if(leaderBoard.isClicked(screenX,screenY)){
             System.out.println("Load Leader Board");
             NinjaGame.loadLeaderBoard();

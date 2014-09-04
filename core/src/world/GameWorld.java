@@ -3,6 +3,9 @@ package world;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Preferences;
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.Sprite;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,6 +14,7 @@ import java.util.Random;
 import constant.C;
 import game.NinjaGame;
 import gameobjects.AbstractNinja;
+import gameobjects.ColorInformSprite;
 import helpers.AssetsLoader;
 import helpers.GameLevelManager;
 import helpers.LocationGenerator;
@@ -45,11 +49,12 @@ public class GameWorld {
     private GameLevelManager gameLevelManager;
     private GameRender gameRender;
 
-    public boolean sameTextColor;
+    public boolean sameTextColor, choseCorrect;
 
     private Preferences prefs;
-
     public SpriteButton play, star, leader;
+    public ColorInformSprite correct, wrong;
+    public Sprite plusOneSecond;
 
     enum GameState {
         RUNNING, CHOOSING, CHOSE, GAME_OVER
@@ -68,6 +73,11 @@ public class GameWorld {
         play = new SpriteButton(AssetsLoader.ninjaAtlas.createSprite("play"), 200, 100).setOpacity(0);
         star = new SpriteButton(AssetsLoader.ninjaAtlas.createSprite("star"), 280, 100).setOpacity(0);
         leader = new SpriteButton(AssetsLoader.ninjaAtlas.createSprite("leader-board"), 360, 100).setOpacity(0);
+
+        this.correct = new ColorInformSprite(AssetsLoader.ninjaAtlas.createSprite("green"),PAUSE_TIME);
+        this.wrong = new ColorInformSprite(AssetsLoader.ninjaAtlas.createSprite("red"),PAUSE_TIME);
+        this.plusOneSecond = AssetsLoader.ninjaAtlas.createSprite("1s");
+        this.plusOneSecond.setPosition(450,250);
     }
 
     public void update(float delta) {
@@ -95,6 +105,8 @@ public class GameWorld {
                         ninja.setDisplay(true);
                     }
                 }
+                correct.update(delta);
+                wrong.update(delta);
                 break;
             case GAME_OVER:
                 break;
@@ -138,6 +150,9 @@ public class GameWorld {
 
         // Show ad now ^_^ Money pleases come
         NinjaGame.googleServices.showBannerAd(true);
+        // Load Ads
+        if (RandomGenerator.trueValueWithPossibility(45))
+            NinjaGame.googleServices.showInterstitialAd(false);
 
         if (score > highScore) {
             highScore = score;
@@ -163,28 +178,35 @@ public class GameWorld {
         if (currentNinja.getLocation().equals(p)) {
             chooseCorrectNinja();
             gameLevelManager.chooseCorrectly();
+            correct.setPosition(p.x-10,p.y);
+            correct.show();
         } else {
             chooseWrongNinja(p);
             gameLevelManager.chooseWrongly();
+            wrong.setPosition(p.x-10,p.y);
+            wrong.show();
         }
     }
 
     private void chooseCorrectNinja() {
-        if (prefs.getBoolean(C.Prefs.SOUND_ENABLE))
+        if (prefs.getBoolean(C.Prefs.SOUND_ENABLE,true))
             AssetsLoader.correct.play();
         System.out.println("Correct");
         score++;
         timeLeft++;
+        choseCorrect = true;
+        gameRender.tweenForChoosingCorrectly();
     }
 
     private void chooseWrongNinja(Point p) {
-        if (prefs.getBoolean(C.Prefs.SOUND_ENABLE))
+        if (prefs.getBoolean(C.Prefs.SOUND_ENABLE,true))
             AssetsLoader.wrong.play();
         for (AbstractNinja ninja : ninjas) {
             if (ninja.getLocation().equals(p)) {
                 ninja.setDisplay(true);
             }
         }
+        choseCorrect = false;
         System.out.println("Incorrect");
     }
 
